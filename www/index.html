@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#120f1a">
+  <meta name="description" content="Gridstone: a sleek, offline 8x8 block puzzle. Drag gem blocks onto the grid, clear rows and columns, chain combos.">
+  <title>Gridstone – Block Puzzle 8×8</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="theme-jewel">
+  <div id="app">
+    <!-- HOME -->
+    <section id="home" class="screen">
+      <div class="home-coins"><span class="coin-ico"></span><span class="coins-val">0</span></div>
+      <div class="logo">
+        <div class="logo-grid" aria-hidden="true">
+          <i class="cell f c1"></i><i class="cell f c1"></i><i class="cell"></i>
+          <i class="cell f c5"></i><i class="cell f c3"></i><i class="cell f c3"></i>
+          <i class="cell f c5"></i><i class="cell f c5"></i><i class="cell f c6"></i>
+        </div>
+        <h1>GRIDSTONE</h1>
+        <p class="tag">Block Puzzle 8×8</p>
+      </div>
+      <div class="home-best">BEST <b id="home-best">0</b></div>
+      <button id="btn-play" class="btn primary big"><span id="play-label">PLAY</span><small id="play-sub">New game</small></button>
+      <div class="home-row">
+        <button id="btn-shop" class="btn plate">◆ Themes</button>
+        <button id="btn-settings-home" class="btn plate">⚙ Settings</button>
+      </div>
+      <a class="home-link" href="privacy.html">Privacy policy</a>
+    </section>
+
+    <!-- GAME -->
+    <section id="game" class="screen hidden">
+      <header class="topbar">
+        <button id="btn-home" class="icon-btn" aria-label="Home">
+          <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5V20h-5.5v-5h-5v5H4z" fill="currentColor"/></svg>
+        </button>
+        <div class="scorebox">
+          <div id="score" class="score">0</div>
+          <div class="best">BEST <span id="best">0</span></div>
+        </div>
+        <div class="top-coins"><span class="coin-ico"></span><span class="coins-val">0</span></div>
+        <button id="btn-restart" class="icon-btn" aria-label="New game">
+          <svg viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-6.6 4.7l1.9.6A5 5 0 1 0 12 7v3L7.5 6 12 2z" fill="currentColor"/></svg>
+        </button>
+      </header>
+      <div id="stage">
+        <div id="board-frame"><div id="board"></div></div>
+        <div id="tray">
+          <div class="slot" data-slot="0"></div>
+          <div class="slot" data-slot="1"></div>
+          <div class="slot" data-slot="2"></div>
+        </div>
+        <div class="toolbar">
+          <div id="streak" class="streak">&nbsp;</div>
+          <button id="btn-reroll" class="tool rewarded">
+            <svg viewBox="0 0 24 24"><path d="M17.6 6.4A8 8 0 0 0 4.1 11H2l3.5 4L9 11H6.2a6 6 0 0 1 10-3.2zM18.5 9 15 13h2.8a6 6 0 0 1-10 3.2l-1.4 1.4A8 8 0 0 0 19.9 13H22z" fill="currentColor"/></svg>
+            <span>Reroll</span><em class="ad-badge">▶ AD</em>
+          </button>
+        </div>
+      </div>
+      <div id="banner-slot" aria-hidden="true"></div>
+    </section>
+
+    <!-- GAME OVER -->
+    <div id="over" class="overlay hidden">
+      <div class="panel over-panel">
+        <div class="over-kicker">NO MOVES LEFT</div>
+        <h2 id="over-title">GAME OVER</h2>
+        <div class="over-stats">
+          <div><b id="over-score">0</b><span>score</span></div>
+          <div><b id="over-best">0</b><span>best</span></div>
+          <div><b id="over-coins">+0</b><span>coins</span></div>
+        </div>
+        <div class="panel-actions col">
+          <button id="btn-revive" class="btn plate rewarded">Revive: clear the center &amp; new pieces <em class="ad-badge">▶ Watch ad</em></button>
+          <button id="btn-newgame" class="btn primary big"><span>NEW GAME</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM RESTART -->
+    <div id="confirm" class="overlay hidden">
+      <div class="panel">
+        <h3>Start a new game?</h3>
+        <p>Your current score will be banked for coins, and the board resets.</p>
+        <div class="panel-actions">
+          <button id="confirm-no" class="btn plate">Keep playing</button>
+          <button id="confirm-yes" class="btn primary">New game</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOP -->
+    <div id="shop" class="overlay hidden">
+      <div class="panel shop-panel">
+        <div class="panel-head"><h3>Themes</h3><div class="top-coins"><span class="coin-ico"></span><span class="coins-val">0</span></div><button class="icon-btn close" data-close="shop" aria-label="Close">✕</button></div>
+        <p class="note">Cosmetic only. Earn coins by scoring (1 coin per 50 points).</p>
+        <div id="shop-grid" class="shop-grid"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="settings" class="overlay hidden">
+      <div class="panel">
+        <div class="panel-head"><h3>Settings</h3><button class="icon-btn close" data-close="settings" aria-label="Close">✕</button></div>
+        <label class="row"><span>Sound effects</span><input type="checkbox" id="set-sound"><i class="sw"></i></label>
+        <label class="row"><span>Haptics</span><input type="checkbox" id="set-haptics"><i class="sw"></i></label>
+        <div class="panel-actions col">
+          <a class="btn plate" href="privacy.html">Privacy policy</a>
+          <button id="btn-privacy-options" class="btn plate hidden">Ad privacy options</button>
+          <button id="btn-reset" class="btn plate danger">Reset progress</button>
+        </div>
+        <p class="ver">Gridstone v1.0.0 · © OfferPk</p>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+    <div id="fx" aria-hidden="true"></div>
+  </div>
+
+  <script src="js/ads-config.js"></script>
+  <script src="js/adgate.js"></script>
+  <script src="js/ads.js"></script>
+  <script src="js/logic.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

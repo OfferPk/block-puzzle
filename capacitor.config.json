@@ -1,0 +1,11 @@
+{
+  "appId": "com.offerpk.blockpuzzle",
+  "appName": "Gridstone",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#120f1a"
+  },
+  "plugins": {
+    "AdMob": {}
+  }
+}
