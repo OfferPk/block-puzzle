@@ -25,10 +25,13 @@
         <p class="tag">Block Puzzle 8×8</p>
       </div>
       <div class="home-best">BEST <b id="home-best">0</b></div>
+      <div class="menu-col">
       <button id="btn-play" class="btn primary big"><span id="play-label">PLAY</span><small id="play-sub">New game</small></button>
       <div class="home-row">
         <button id="btn-shop" class="btn plate">◆ Themes</button>
         <button id="btn-settings-home" class="btn plate">⚙ Settings</button>
+      </div>
+      <button id="btn-howto" class="btn plate big howto-open" type="button"><span>How to play</span><small>Rules</small></button>
       </div>
       <a class="home-link" href="privacy.html">Privacy policy</a>
     </section>
@@ -115,11 +118,27 @@
           <button id="btn-privacy-options" class="btn plate hidden">Ad privacy options</button>
           <button id="btn-reset" class="btn plate danger">Reset progress</button>
         </div>
-        <p class="ver">Gridstone v1.0.0 · © OfferPk</p>
+        <p class="ver">Gridstone v1.0.1 · © OfferPk</p>
       </div>
     </div>
 
-    <div id="toast" class="toast hidden"></div>
+        <div id="howto" class="overlay hidden">
+      <div class="howto-card" role="dialog" aria-modal="true" aria-label="How to play">
+        <button class="howto-x" type="button" data-close="howto" aria-label="Close">✕</button>
+        <table class="rules">
+          <thead><tr><th>Rule</th><th>Kaise</th></tr></thead>
+          <tbody>
+            <tr><td>Goal</td><td>Rows aur columns bharo, score barhao</td></tr>
+            <tr><td>Move</td><td>Tray ka piece board par drag karo</td></tr>
+            <tr><td>Win</td><td>Koi jeet nahi. Best score save hota hai</td></tr>
+            <tr><td>Fail</td><td>Koi bacha piece fit na ho to game over</td></tr>
+            <tr><td>Booster</td><td>Reroll naye pieces, ek dafa per tray. Revive center 4x4 saaf, ek dafa</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+<div id="toast" class="toast hidden"></div>
     <div id="fx" aria-hidden="true"></div>
   </div>
 

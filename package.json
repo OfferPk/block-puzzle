@@ -1,6 +1,6 @@
 {
   "name": "block-puzzle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Offline 8x8 block puzzle Gridstone (vanilla JS) with a Capacitor Android build and AdMob.",
   "private": true,
   "license": "MIT",
