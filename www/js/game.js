@@ -305,10 +305,10 @@
   }
   function gameOver() {
     G.over = true;
-    if (ach) { ach.bump('games'); ach.max('best_score', G.score); }
+    if (ach) { if (!G.achCounted) { G.achCounted = 1; ach.bump('games'); } ach.max('best_score', G.score); }
     var due = bankCoins();
     persist();
-    if (G.newBest) SFX.best(); else SFX.over();
+    if (G.newBest) { SFX.best(); if (window.Juice) window.Juice.burst(); } else SFX.over();
     haptic('error');
     showOver(due);
   }
@@ -372,6 +372,7 @@
     window.Ads.hideBanner();
   }
   function showGame() {
+    maybeTutorial(false);
     $('home').classList.add('hidden'); $('game').classList.remove('hidden');
     layout(); renderAll(true);
     if (G.over) showOver(null);
@@ -464,6 +465,37 @@
     if (++ticks % 10 === 0) persist();
   }, 1000);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') persist(); });
+
+  // ---------------- first-level tutorial (coach marks, shown once) ----------------
+  var COACH_KEY = 'gridstone.coach.v1';
+  var COACH_STEPS = [
+      {
+          "target": "#tray",
+          "text": "Drag a piece from the tray and drop it on the board."
+      },
+      {
+          "target": "#board-frame",
+          "text": "Fill a whole row or column to clear it. Clear several at once for a combo bonus."
+      },
+      {
+          "target": "#btn-reroll",
+          "text": "Stuck? Reroll gives new pieces once per tray. It plays a short ad only when you tap it."
+      },
+      {
+          "target": null,
+          "text": "The game ends when no piece fits. Beat your best score and earn coins for themes!"
+      }
+  ];
+  function maybeTutorial(force) {
+    setTimeout(function () {
+      if ($('game').classList.contains('hidden')) return;
+      window.Coach.run(COACH_KEY, COACH_STEPS, { force: force, sfx: function () { SFX.click(); } });
+    }, 450);
+  }
+  $('btn-replay-tutorial').addEventListener('click', function () {
+    SFX.click(); window.CoachLogic.reset(localStorage, COACH_KEY); $('settings').classList.add('hidden');
+    toast('The tutorial will play when you next open the game screen');
+  });
 
   // ---------------- achievements + stats ----------------
   var ACH_DEFS = window.ACH_DEFS;

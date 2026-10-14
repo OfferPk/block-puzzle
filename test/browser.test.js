@@ -6,11 +6,14 @@ const URL = (process.argv[2] || 'http://localhost:8778/').replace(/\/?$/, '/');
 const OUT = process.argv[3] || '/tmp';
 const KEY = 'gridstone.save.v1';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const achInfo = (k) => globalThis.__page.evaluate((k) => { const s = JSON.parse(localStorage.getItem(k) || '{}'); const defs = window.AchLogic.COMMON.concat(window.ACH_DEFS);
+  return { paid: defs.filter(d => s.done && s.done[d.id]).reduce((a, d) => a + d.reward, 0), m: s.m || {}, done: Object.keys(s.done || {}) }; }, k);
 const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log('  ok -', m); };
 
 (async () => {
   const browser = await puppeteer.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox'] });
-  const page = await browser.newPage();
+  const page = await browser.newPage(); globalThis.__page = page; await page.evaluateOnNewDocument(() => { try { localStorage.setItem('gridstone.coach.v1', '1'); } catch (e) {} });
   await page.emulate({ viewport: { width: 360, height: 640, deviceScaleFactor: 3, isMobile: true, hasTouch: true },
     userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129 Mobile Safari/537.36' });
   const errors = [];
@@ -118,6 +121,7 @@ const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log(
     const g2 = await game();
     const row7 = g2.board.slice(56, 64).every(v => v === 0);
     assert(row7, 'completing row 8 cleared it');
+    { const a0 = await achInfo('gridstone.ach.v1'); assert(a0.m.lines >= 1 && a0.m.best_multi >= 1, 'achievement counter: lines cleared went up (' + a0.m.lines + ')'); }
     assert(g2.score - pts === 3 + 20, 'line clear scored 3 (cells) + 20 (1 line) = ' + (g2.score - pts));
     await page.screenshot({ path: `${OUT}/bp-cleared.png` });
   }
@@ -155,10 +159,14 @@ const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log(
     // second game over in the same game: no second revive; New game starts fresh and counts a completed game
     const board = new Array(64).fill(0).map((_, i) => ((Math.floor(i / 8) + i % 8) % 4 === 0 ? 0 : 1 + (i % 7)));
     const st = baseGame(board, [await id('dot'), await id('duo'), await id('tri-r1')]); st.reviveUsed = true; st.score = 250;
+    const paidBefore = (await achInfo('gridstone.ach.v1')).paid;
     await inject(st, { ad: { gamesSince: 0, gamesCompleted: 0, lastTs: 0, playMs: 0 } });
     await dragTouch(0, 0, 0); await sleep(900);
     assert((await game()).over && await page.$eval('#btn-revive', e => e.classList.contains('hidden')), 'revive not offered twice in one game');
-    const coins = await page.evaluate(() => window.__bp.save.coins);
+    const a1 = await achInfo('gridstone.ach.v1');
+    console.log('    ach metrics:', JSON.stringify(a1.m), 'unlocked:', a1.done.join(','));
+    assert(a1.m.games >= 1 && a1.m.best_score >= 250 && a1.done.includes('bp_first'), 'achievement counters: games + best score went up on game over; First Stone unlocked');
+    const coins = await page.evaluate(() => window.__bp.save.coins) - (a1.paid - paidBefore);
     assert(coins === 5, 'cosmetic coins banked on game over (251 pts → 5)');
     await page.tap('#btn-newgame'); await sleep(700);
     const g7 = await game();
