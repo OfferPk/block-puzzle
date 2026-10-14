@@ -10,7 +10,7 @@
 
   // ---------------- persistence ----------------
   function defaults() {
-    return { best: 0, coins: 0, owned: ['jewel'], theme: 'jewel', settings: { sound: true, haptics: true }, game: null, ad: {} };
+    return { best: 0, coins: 0, owned: ['jewel'], theme: 'jewel', bg: 'none', ownedBg: ['none'], trial: {}, settings: { sound: true, haptics: true }, game: null, ad: {} };
   }
   function load() {
     var d = defaults();
@@ -77,7 +77,10 @@
   function applyTheme() {
     var cl = document.body.classList;
     Array.prototype.slice.call(cl).forEach(function (c) { if (/^theme-/.test(c)) cl.remove(c); });
-    cl.add('theme-' + save.theme);
+    var tid = window.ShopCore.current(save, 'theme', 'theme');
+    if (!THEMES.some(function (t) { return t.id === tid; })) tid = 'jewel';
+    cl.add('theme-' + tid);
+    window.ShopCore.applyBg(save);
   }
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function fmt(n) { return String(n); }
@@ -376,29 +379,20 @@
   // ---------------- shop ----------------
   function renderShop() {
     setCoins();
-    var grid = $('shop-grid'); grid.innerHTML = '';
-    THEMES.forEach(function (th) {
-      var owned = save.owned.indexOf(th.id) >= 0, sel = save.theme === th.id;
-      var d = document.createElement('div'); d.className = 'item theme-' + th.id + (sel ? ' selected' : '');
-      var prev = document.createElement('div'); prev.className = 'prev';
-      var mini = document.createElement('div'); mini.className = 'mini';
-      [1, 1, 0, 5, 3, 0, 5, 5, 6, 0, 2, 4, 7, 7, 2, 4].forEach(function (v) { var c = document.createElement('div'); c.className = v ? 'cell f c' + v : 'cell'; mini.appendChild(c); });
-      prev.appendChild(mini); d.appendChild(prev);
-      var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = th.name; d.appendChild(nm);
-      var b = document.createElement('button'); b.className = 'buy';
-      if (sel) b.textContent = 'Equipped';
-      else if (owned) { b.textContent = 'Equip'; b.classList.add('can'); }
-      else { b.innerHTML = '<span class="coin-ico"></span>' + th.price; if (save.coins >= th.price) b.classList.add('can'); }
-      b.addEventListener('click', function () {
-        if (sel) return;
-        if (!owned) {
-          if (save.coins < th.price) { SFX.error(); toast('Score ' + ((th.price - save.coins) * 50) + ' more points to unlock'); return; }
-          save.coins -= th.price; save.owned.push(th.id); SFX.coin();
-        } else SFX.click();
-        save.theme = th.id; persist(); applyTheme(); renderShop();
-      });
-      d.appendChild(b);
-      grid.appendChild(d);
+    window.ShopCore.render({
+      grid: $('shop-grid'), save: save, persist: persist, apply: function () { applyTheme(); setCoins(); }, toast: toast,
+      sfx: function (k) { if (k === 'coin') SFX.coin(); else if (k === 'error') SFX.error(); else SFX.click(); },
+      rewarded: function (ok, fail) { window.Ads.showRewarded(ok, fail); },
+      needMsg: function (n) { return 'Need ' + n + ' more coins. Claim your Daily reward or score ' + (n * 50) + ' points.'; },
+      groups: [
+        { title: 'Block themes', kind: 'theme', field: 'theme', owned: save.owned, items: THEMES, itemClass: function (t) { return 'theme-' + t.id; },
+          thumb: function () {
+            var mini = document.createElement('div'); mini.className = 'mini';
+            [1, 1, 0, 5, 3, 0, 5, 5, 6, 0, 2, 4, 7, 7, 2, 4].forEach(function (v) { var c = document.createElement('div'); c.className = v ? 'cell f c' + v : 'cell'; mini.appendChild(c); });
+            return mini;
+          } },
+        { title: 'Backgrounds', kind: 'bg', field: 'bg', owned: save.ownedBg, items: window.ShopCore.BACKGROUNDS, thumb: window.ShopCore.bgThumb }
+      ]
     });
   }
   function syncSettingsUI() {
@@ -432,6 +426,9 @@
   $('btn-revive').addEventListener('click', revive);
   $('btn-reroll').addEventListener('click', reroll);
   $('btn-shop').addEventListener('click', function () { SFX.unlock(); SFX.click(); renderShop(); $('shop').classList.remove('hidden'); });
+  $('btn-shop-card').addEventListener('click', function () { SFX.unlock(); SFX.click(); renderShop(); $('shop').classList.remove('hidden'); });
+  document.querySelector('[data-close="shop"]').addEventListener('click', function () { if (window.ShopCore.endPreview()) applyTheme(); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') applyTheme(); });
   $('btn-settings-home').addEventListener('click', function () { SFX.unlock(); SFX.click(); syncSettingsUI(); $('settings').classList.remove('hidden'); });
   function syncMenuCard() {
     var b = $('btn-play');
