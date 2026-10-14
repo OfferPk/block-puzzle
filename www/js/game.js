@@ -73,7 +73,7 @@
     var t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
     clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.add('hidden'); }, ms || 2200);
   }
-  function setCoins() { Array.prototype.forEach.call(document.querySelectorAll('.coins-val'), function (e) { e.textContent = save.coins; }); }
+  function setCoins() { Array.prototype.forEach.call(document.querySelectorAll('.coins-val'), function (e) { e.textContent = save.coins; }); if (typeof ach !== 'undefined' && ach) ach.sync(); }
   function applyTheme() {
     var cl = document.body.classList;
     Array.prototype.slice.call(cl).forEach(function (c) { if (/^theme-/.test(c)) cl.remove(c); });
@@ -246,6 +246,8 @@
     } else {
       G.board = res.board;
     }
+    if (ach) ach.max('best_score', G.score);
+    if (lines && ach) { ach.bump('lines', lines); ach.max('best_multi', lines); ach.max('best_combo', sc.streak || 0); }
     if (G.score > save.best) { if (!G.newBest && save.best > 0) toast('New best score!'); save.best = G.score; G.newBest = true; }
     var dealt = false;
     if (G.tray.every(function (x) { return x == null; })) { deal(G); dealt = true; }
@@ -303,6 +305,7 @@
   }
   function gameOver() {
     G.over = true;
+    if (ach) { ach.bump('games'); ach.max('best_score', G.score); }
     var due = bankCoins();
     persist();
     if (G.newBest) SFX.best(); else SFX.over();
@@ -462,9 +465,22 @@
   }, 1000);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') persist(); });
 
+  // ---------------- achievements + stats ----------------
+  var ACH_DEFS = window.ACH_DEFS;
+  var ach = window.Achievements.create({
+    key: 'gridstone.ach.v1', defs: ACH_DEFS,
+    addCoins: function (n) { save.coins += n; persist(); setCoins(); },
+    coins: function () { return save.coins; },
+    bought: function () { return Math.max(0, save.owned.length - 1) + Math.max(0, (save.ownedBg || []).length - 1); },
+    toast: toast, sfx: function (k) { if (k === 'coin') SFX.coin(); else SFX.click(); },
+    stats: function (st) { var g = function (k) { return st.m[k] || 0; }; return [['Best score', (save.best || 0).toLocaleString('en-US')], ['Lines cleared', g('lines').toLocaleString('en-US')], ['Best combo streak', String(g('best_combo'))]]; }
+  });
+  $('btn-ach-card').addEventListener('click', function () { SFX.unlock(); SFX.click(); ach.open(); });
+
   // ---------------- daily ----------------
   var daily = window.Daily.create({
     key: 'gridstone.daily.v1',
+    onEvent: function (t, d) { if (!ach) return; if (t === 'claim') { ach.bump('daily_claims'); ach.max('daily_best_day', d.day); } else { ach.bump('challenges'); ach.max('best_chal_streak', d.streak); } },
     addCoins: function (n) { save.coins += n; persist(); setCoins(); },
     rewarded: function (ok, fail) { window.Ads.showRewarded(ok, fail); },
     toast: toast, sfx: function (k) { if (k === 'coin') SFX.coin(); else SFX.click(); },
