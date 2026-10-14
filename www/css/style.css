@@ -345,3 +345,59 @@ body.bg-prism, .bg-swatch.bg-prism { background: conic-gradient(from 210deg at 5
 .coach-tip.compact { padding: 7px 10px; font-size: 13px; line-height: 1.25; }
 .coach-tip.compact p { margin: 0 0 5px; }
 .coach-tip.compact .coach-row button { padding: 4px 10px; font-size: 13px; }
+
+/* v1.6 themes */
+.theme-tidepool {
+  --bg: radial-gradient(120% 80% at 50% 0%, #0f4a55 0%, #082a33 55%, #04161b 100%);
+  --txt: #e6f7f6; --muted: #86b9b6; --accent: #ffb27a; --accent-2: #e5804a; --accent-ink: #2a1205;
+  --panel: linear-gradient(180deg, #11414a, #0a272e); --plate: linear-gradient(180deg, #175560, #0e3840); --plate-edge: #041519;
+  --board: linear-gradient(160deg, #0e4049, #072329); --board-edge: rgba(255,178,122,.35); --cell: #0b3239; --cell-in: rgba(0,0,0,.32);
+  --k1: #ff7a6b; --k2: #ffb27a; --k3: #f7dc7a; --k4: #4fd1a5; --k5: #3fa9e0; --k6: #a58cf0; --k7: #6fe3e8;
+  --blk-img: radial-gradient(circle at 30% 25%, rgba(255,255,255,.55) 0 12%, rgba(255,255,255,.08) 40%, rgba(0,0,0,.28) 100%);
+  --blk-sh: inset 0 0 0 1px rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.25), 0 2px 3px rgba(0,0,0,.45);
+  --facet: .4;
+}
+.theme-kiln {
+  --bg: radial-gradient(110% 70% at 50% 105%, rgba(255,110,40,.28) 0%, transparent 60%), linear-gradient(180deg, #2a1611, #120907);
+  --txt: #fbe9de; --muted: #c39a85; --accent: #ff9447; --accent-2: #d8622a; --accent-ink: #2a0d02;
+  --panel: linear-gradient(180deg, #3a2018, #1d0f0b); --plate: linear-gradient(180deg, #4a2a1f, #2e1912); --plate-edge: #100604;
+  --board: linear-gradient(160deg, #3b2119, #1e100c); --board-edge: rgba(255,148,71,.4); --cell: #2f1913; --cell-in: rgba(0,0,0,.4);
+  --k1: #e2483a; --k2: #ff8a3a; --k3: #f2c04a; --k4: #b5743c; --k5: #8a3a2a; --k6: #d96a5a; --k7: #f5a97a;
+  --blk-img: linear-gradient(160deg, rgba(255,240,200,.45) 0%, rgba(255,200,120,.08) 40%, rgba(0,0,0,.35) 100%);
+  --blk-sh: inset 0 0 0 1px rgba(255,200,150,.25), inset 0 -3px 0 rgba(40,10,0,.4), 0 0 6px rgba(255,120,40,.25);
+  --facet: 0;
+}
+.theme-nebula {
+  --bg: radial-gradient(60% 40% at 20% 20%, rgba(180,90,255,.25), transparent 70%), radial-gradient(60% 40% at 85% 70%, rgba(60,180,255,.2), transparent 70%), linear-gradient(180deg, #0d0b22, #05040f);
+  --txt: #eeeaff; --muted: #9c95c8; --accent: #8fe3ff; --accent-2: #4fb5e0; --accent-ink: #04161f;
+  --panel: linear-gradient(180deg, #1b1838, #0d0b1f); --plate: linear-gradient(180deg, #25204a, #15122e); --plate-edge: #05040d;
+  --board: linear-gradient(160deg, #1a1638, #0b0a1c); --board-edge: rgba(143,227,255,.35); --cell: #15122e; --cell-in: rgba(0,0,0,.4);
+  --k1: #ff5fa2; --k2: #ff9f6b; --k3: #ffe27a; --k4: #6bffc4; --k5: #5fb8ff; --k6: #b07bff; --k7: #7af0ff;
+  --blk-img: linear-gradient(135deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.05) 45%, rgba(255,255,255,.18) 60%, rgba(0,0,0,.3) 100%);
+  --blk-sh: inset 0 0 0 1px rgba(255,255,255,.3), 0 0 8px rgba(160,140,255,.35), 0 2px 3px rgba(0,0,0,.5);
+  --facet: 1;
+}
+.theme-moss {
+  --bg: radial-gradient(120% 80% at 50% 0%, #2f3b2a 0%, #1a2217 55%, #0d110b 100%);
+  --txt: #eef2e6; --muted: #a3b096; --accent: #d9c58a; --accent-2: #a8924f; --accent-ink: #1f1a08;
+  --panel: linear-gradient(180deg, #2c3627, #171d14); --plate: linear-gradient(180deg, #3a4633, #252e20); --plate-edge: #0b0e09;
+  --board: linear-gradient(160deg, #4a4d45, #2c2e29); --board-edge: rgba(217,197,138,.3); --cell: #3a3c36; --cell-in: rgba(0,0,0,.35);
+  --k1: #b8573f; --k2: #c98f4a; --k3: #cdb45a; --k4: #6f9a4a; --k5: #4f7d74; --k6: #7a6a9a; --k7: #8fb07a;
+  --blk-img: radial-gradient(circle at 70% 30%, rgba(255,255,255,.18) 0 18%, transparent 40%), linear-gradient(135deg, rgba(255,255,255,.25), rgba(0,0,0,0) 50%, rgba(0,0,0,.3));
+  --blk-sh: inset 0 0 0 1px rgba(255,255,240,.15), inset 0 -3px 0 rgba(0,0,0,.3), 0 2px 3px rgba(0,0,0,.5);
+  --facet: 0;
+}
+/* Weekly challenge (v1.6) */
+.weekly { margin-top: 4px; }
+.weekly-left { text-transform: none; letter-spacing: 0; font-weight: 600; opacity: .75; }
+.weekly-goals { display: flex; flex-direction: column; gap: 6px; }
+.weekly-goal { padding: 7px 10px; border-radius: 10px; background: rgba(127,127,127,.12); }
+.weekly-row { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.weekly-n { white-space: nowrap; }
+.weekly-bar { height: 5px; border-radius: 3px; background: rgba(127,127,127,.25); margin-top: 5px; overflow: hidden; }
+.weekly-bar i { display: block; height: 100%; background: #f2b84b; border-radius: 3px; }
+.weekly-goal.done .weekly-bar i { background: #3fcf8e; }
+.weekly-goal.done { opacity: .75; }
+.weekly-foot { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 8px; opacity: .85; }
+.weekly-crest { font-size: 18px; }
+.daily-panel { max-height: calc(100% - 24px); overflow-y: auto; }
