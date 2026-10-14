@@ -10,7 +10,7 @@
 
   // ---------------- persistence ----------------
   function defaults() {
-    return { best: 0, coins: 0, owned: ['jewel'], theme: 'jewel', bg: 'none', ownedBg: ['none'], trial: {}, settings: { sound: true, haptics: true }, game: null, ad: {} };
+    return { best: 0, coins: 0, owned: ['jewel'], theme: 'jewel', bg: 'none', ownedBg: ['none'], trial: {}, settings: { sound: true, haptics: true, marks: false }, game: null, ad: {} };
   }
   function load() {
     var d = defaults();
@@ -404,7 +404,7 @@
   }
   function syncSettingsUI() {
     $('set-sound').checked = !!save.settings.sound;
-    $('set-haptics').checked = !!save.settings.haptics;
+    $('set-haptics').checked = !!save.settings.haptics; $('set-marks').checked = !!save.settings.marks; if (window.A11y) window.A11y.sync(save.settings, { reduceMotion: 'set-motion', largeText: 'set-large', contrast: 'set-contrast' });
     $('btn-privacy-options').classList.toggle('hidden', !(native && window.Ads.privacyOptionsRequired()));
   }
 
@@ -451,6 +451,11 @@
   });
   $('set-sound').addEventListener('change', function (e) { save.settings.sound = e.target.checked; SFX.setEnabled(save.settings.sound); persist(); SFX.click(); });
   $('set-haptics').addEventListener('change', function (e) { save.settings.haptics = e.target.checked; persist(); haptic('light'); });
+  // v1.8 accessibility
+  var A11Y_IDS = { reduceMotion: 'set-motion', largeText: 'set-large', contrast: 'set-contrast' };
+  if (window.A11y) window.A11y.bind(save.settings, persist, A11Y_IDS, function (k) { haptic('light'); if (k === 'largeText' || k === 'contrast') { try { window.dispatchEvent(new Event('resize')); } catch (e) {} } });
+  document.body.classList.toggle('marks', !!save.settings.marks);
+  $('set-marks').addEventListener('change', function (e) { save.settings.marks = e.target.checked; persist(); document.body.classList.toggle('marks', !!save.settings.marks); haptic('light'); });
   $('btn-privacy-options').addEventListener('click', function () { window.Ads.showPrivacyOptions(); });
   $('btn-reset').addEventListener('click', function () {
     if (!confirm('Reset best score, coins, themes and the current game?')) return;
@@ -547,6 +552,7 @@
   window.__weekly = weekly;
 
   // ---------------- boot ----------------
+  if (window.A11y) window.A11y.apply(save.settings);
   SFX.setEnabled(save.settings.sound);
   applyTheme(); setCoins(); buildBoard();
   if (validGame(save.game)) { G = save.game; rng = L.makeRng(G.rng || newSeed()); if (!Array.isArray(G.colors)) G.colors = [1, 2, 3]; }
