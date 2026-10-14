@@ -101,12 +101,15 @@
   // ---------------- rendering ----------------
   function buildBoard() {
     var b = $('board'); b.innerHTML = ''; cells = [];
-    for (var i = 0; i < N * N; i++) { var d = document.createElement('div'); d.className = 'cell'; d.dataset.i = i; b.appendChild(d); cells.push(d); }
+    for (var i = 0; i < N * N; i++) { var d = document.createElement('div'); d.className = 'cell'; d.dataset.i = i; d.setAttribute('role', 'button'); d.tabIndex = -1; d.addEventListener('click', srCellClick); b.appendChild(d); cells.push(d); }
+    b.setAttribute('role', 'group'); b.setAttribute('aria-label', N + ' by ' + N + ' board');
   }
   function renderBoard() {
     for (var i = 0; i < N * N; i++) {
       var v = G.board[i];
       cells[i].className = v ? 'cell f c' + v : 'cell';
+      var lab = 'Row ' + (Math.floor(i / N) + 1) + ', column ' + (i % N + 1) + (v ? ', filled ' + SR_COL[v] : ', empty');
+      if (cells[i].getAttribute('aria-label') !== lab) cells[i].setAttribute('aria-label', lab);
     }
   }
   function pieceEl(id, color) {
@@ -127,7 +130,11 @@
       var slot = document.querySelector('.slot[data-slot="' + i + '"]');
       slot.innerHTML = ''; slot.classList.remove('dragging', 'nofit');
       var id = G.tray[i];
-      if (id == null) continue;
+      slot.setAttribute('role', 'button'); slot.tabIndex = 0;
+      slot.classList.toggle('sr-sel', srPick === i && id != null);
+      if (id == null) { slot.setAttribute('aria-label', 'Tray slot ' + (i + 1) + ': used'); continue; }
+      var pp = L.PIECES[id], fits = L.fitsAnywhere(G.board, pp);
+      slot.setAttribute('aria-label', 'Piece ' + (i + 1) + ': ' + pp.size + ' ' + SR_COL[G.colors[i]] + ' blocks, ' + pp.wd + ' wide by ' + pp.h + ' tall, ' + srShape(pp) + (fits ? '' : ", doesn't fit anywhere") + (srPick === i ? ', selected' : ''));
       var el = pieceEl(id, G.colors[i]);
       if (animate) { el.classList.add('enter'); el.style.animationDelay = (i * 70) + 'ms'; }
       slot.appendChild(el);
@@ -184,6 +191,35 @@
     lines.rows.forEach(function (r) { for (var c = 0; c < N; c++) mark(r * N + c); });
     lines.cols.forEach(function (c) { for (var r = 0; r < N; r++) mark(r * N + c); });
     function mark(i) { var el = cells[i]; el.classList.add(el.classList.contains('f') ? 'will-clear' : 'lane-glow'); }
+  }
+  // ---------------- screen reader / keyboard placement (v1.9) ----------------
+  // Activate a tray piece (TalkBack double-tap or Enter/Space), then a board cell = top-left of the piece.
+  var SR_COL = ['', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'cyan'], srPick = -1;
+  function srShape(p) {
+    var rows = [];
+    for (var r = 0; r < p.h; r++) { var s = ''; for (var c = 0; c < p.wd; c++) s += p.cells.some(function (q) { return q[0] === r && q[1] === c; }) ? 'X' : 'o'; rows.push(s); }
+    return 'rows ' + rows.join(' / ');
+  }
+  function srSlotActivate(i) {
+    if (busy || drag || G.over || G.tray[i] == null) return;
+    srPick = srPick === i ? -1 : i; SFX.pick(); renderTray(false);
+    if (window.SR) window.SR.say(srPick < 0 ? 'Selection cleared.' : 'Piece ' + (i + 1) + ' selected. Choose the board cell for its top-left corner.');
+  }
+  function srCellClick(e) {
+    if (!window.SR || !window.SR.assistive(e)) return;
+    var i = +e.currentTarget.dataset.i, r = Math.floor(i / N), c = i % N;
+    if (busy || drag || G.over) return;
+    if (srPick < 0 || G.tray[srPick] == null) { window.SR.say('Pick a piece from the tray first.'); return; }
+    var p = L.PIECES[G.tray[srPick]];
+    if (r + p.h > N || c + p.wd > N || !L.canPlace(G.board, p, r, c)) { SFX.error(); window.SR.say("Doesn't fit there."); return; }
+    var slot = document.querySelector('.slot[data-slot="' + srPick + '"]'), sr = slot.getBoundingClientRect();
+    var el = document.createElement('div'); el.id = 'drag'; el.appendChild(pieceEl(G.tray[srPick], G.colors[srPick]));
+    el.style.transform = 'translate(' + sr.left + 'px,' + sr.top + 'px)'; document.body.appendChild(el); slot.classList.add('dragging');
+    var d = { i: srPick, p: p, el: el, slot: slot, target: { r: r, c: c } }; srPick = -1;
+    var before = G.score;
+    Promise.resolve(commit(d)).then(function () {
+      window.SR.say('Placed. Score ' + G.score + (G.score - before > p.size ? ', lines cleared' : '') + (G.over ? '. No moves left, game over.' : '.'));
+    });
   }
   function onDown(e) {
     var slot = e.currentTarget, i = +slot.dataset.slot;
@@ -411,6 +447,8 @@
   // ---------------- wiring ----------------
   Array.prototype.forEach.call(document.querySelectorAll('.slot'), function (s) {
     s.addEventListener('pointerdown', onDown);
+    s.addEventListener('click', function (e) { if (window.SR && window.SR.assistive(e)) srSlotActivate(+e.currentTarget.dataset.slot); });
+    s.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); srSlotActivate(+e.currentTarget.dataset.slot); } });
     s.addEventListener('pointermove', onMove);
     s.addEventListener('pointerup', onUp);
     s.addEventListener('pointercancel', onUp);
@@ -552,6 +590,7 @@
   window.__weekly = weekly;
 
   // ---------------- boot ----------------
+  if (window.A11y && window.A11y.previewBar) window.A11y.previewBar({ settings: save.settings, marks: true, rerender: function () { if (typeof renderShop === 'function') renderShop(); }, sfx: function () { SFX.click(); } });
   if (window.A11y) window.A11y.apply(save.settings);
   SFX.setEnabled(save.settings.sound);
   applyTheme(); setCoins(); buildBoard();
