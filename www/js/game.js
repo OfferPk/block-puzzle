@@ -319,6 +319,7 @@
     $('over-title').textContent = G.newBest ? 'NEW BEST' : 'GAME OVER';
     $('btn-revive').classList.toggle('hidden', !!G.reviveUsed);
     $('over').classList.remove('hidden');
+    if (G.newBest && window.Review && ach) window.Review.maybe('gridstone.review.v1', ach.get('games'));
     renderTray(false);
   }
   function revive() {
@@ -465,6 +466,17 @@
     if (++ticks % 10 === 0) persist();
   }, 1000);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') persist(); });
+
+  // ---------------- cloud save (Play Games) - OFF unless CLOUD_CONFIG.ENABLED ----------------
+  if (window.CloudSave && window.CloudSave.enabled()) {
+    var CK = window.CLOUD_CONFIG.KEYS;
+    $('btn-cloud').classList.remove('hidden');
+    $('btn-cloud').addEventListener('click', function () {
+      SFX.click(); persist();
+      window.CloudSave.save(CK).then(function (r) { toast(r.ok ? 'Progress backed up to Play Games' : 'Cloud save unavailable'); }, function () { toast('Cloud save failed. Try again later.'); });
+    });
+    window.CloudSave.restore(CK).then(function (r) { if (r && r.applied) location.reload(); }, function () {});
+  }
 
   // ---------------- first-level tutorial (coach marks, shown once) ----------------
   var COACH_KEY = 'gridstone.coach.v1';

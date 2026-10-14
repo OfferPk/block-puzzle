@@ -21,6 +21,8 @@ CAPTIONS = [
     ('04', '7-shop', 'PREMIUM THEMES', 'Jewel, walnut, jade & more. Cosmetic only'),
     ('05', '6-marble', 'CALM, CLEAN, CLASSY', 'No timers. Think, place, relax'),
     ('06', '4-jade', 'FAIR PIECES EVERY TIME', 'Smart dealer avoids impossible sets. Plays offline'),
+    ('07', 'v15-daily', 'DAILY REWARDS', 'A 7-day streak calendar and a Daily Board'),
+    ('08', 'v15-ach', 'ACHIEVEMENTS & STATS', '18 goals to chase. Track your best runs'),
 ]
 
 
