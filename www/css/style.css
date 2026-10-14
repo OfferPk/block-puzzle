@@ -298,3 +298,7 @@ body.bg-waves, .bg-swatch.bg-waves { background: repeating-radial-gradient(circl
 body.bg-prism, .bg-swatch.bg-prism { background: conic-gradient(from 210deg at 50% 30%, rgba(255,80,160,.18), rgba(255,200,80,.14), rgba(80,255,200,.16), rgba(80,140,255,.18), rgba(255,80,160,.18)), var(--bg, #141022); }
 .bg-swatch.bg-none { background: var(--bg, #222); }
 .shop-grid .item.theme-sakura .nm, .shop-grid .item.theme-marble .nm { color: var(--muted, #ccc); filter: brightness(1.6); }
+/* v1.2.1: coin badge sits in the header row, never under the close button */
+.panel-head .top-coins { position: static; transform: none; flex: none; padding: 4px 10px 4px 4px; }
+.panel-head h3 { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.panel-head .close { flex: none; }
