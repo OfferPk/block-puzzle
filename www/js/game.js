@@ -47,13 +47,15 @@
     g.rerollUsed = false;
     g.rng = rng.s;
   }
-  function freshGame() {
-    rng = L.makeRng(newSeed());
+  function freshGame(seed, dailyKey) {
+    rng = L.makeRng(seed != null ? seed : newSeed());
     var g = { board: L.emptyBoard(), tray: [null, null, null], colors: [1, 1, 1], score: 0, streak: 0, sinceClear: 0, moves: 0,
       reviveUsed: false, rerollUsed: false, over: false, awarded: 0, newBest: false, rng: 0 };
+    if (dailyKey) g.daily = dailyKey;
     deal(g);
     return g;
   }
+  var DAILY_TARGET = 1000;
 
   // ---------------- helpers ----------------
   function haptic(kind) {
@@ -129,9 +131,13 @@
     $('btn-reroll').disabled = G.rerollUsed || G.over;
   }
   function renderScore() {
+    setTimeout(checkDaily, 0);
     $('score').textContent = fmt(G.score);
     $('best').textContent = fmt(Math.max(save.best, G.score));
     $('streak').innerHTML = G.streak >= 2 ? 'STREAK ×' + G.streak : '&nbsp;';
+  }
+  function checkDaily() {
+    if (G && G.daily && G.score >= DAILY_TARGET && daily && !daily.isDone(G.daily)) daily.complete(G.daily);
   }
   function renderAll(animateTray) { renderBoard(); renderTray(animateTray); renderScore(); }
 
@@ -458,6 +464,21 @@
     if (++ticks % 10 === 0) persist();
   }, 1000);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') persist(); });
+
+  // ---------------- daily ----------------
+  var daily = window.Daily.create({
+    key: 'gridstone.daily.v1',
+    addCoins: function (n) { save.coins += n; persist(); setCoins(); },
+    rewarded: function (ok, fail) { window.Ads.showRewarded(ok, fail); },
+    toast: toast, sfx: function (k) { if (k === 'coin') SFX.coin(); else SFX.click(); },
+    challenge: function () { return { title: 'Daily Board', desc: 'Same seeded board for everyone today. Score ' + DAILY_TARGET + '+', cta: 'Play Daily Board' }; },
+    play: function (key) {
+      if (G && !G.over) bankCoins();
+      G = save.game = freshGame(window.DailyLogic.seedFor(key, 'gridstone'), key); persist(); showGame();
+      toast('Daily Board: score ' + DAILY_TARGET + ' to complete');
+    }
+  });
+  $('btn-daily').addEventListener('click', function () { SFX.unlock(); SFX.click(); daily.open(); });
 
   // ---------------- boot ----------------
   SFX.setEnabled(save.settings.sound);
